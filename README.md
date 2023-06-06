@@ -16,6 +16,8 @@ Discussing with a Youtube video!
 7. Ask the bot to check a video
 
     By using the command `!set_video {youtube_url}` in the discord server where the bot is installed
+
+
 8. Ask the bot anything about the video
 
 ## 🤔 What is this?
