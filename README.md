@@ -23,3 +23,5 @@ Discussing with a Youtube video!
 With the emergence of instructional Language Models, there is now the possibility to have personal assistant to have summaries and Question/Answers over material. 
 This includes YouTube videos.
 
+## Remarks
+This has been build with OPENAI API and Langchain
