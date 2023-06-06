@@ -17,8 +17,11 @@ Discussing with a Youtube video!
 
     By using the command `!set_video {youtube_url}` in the discord server where the bot is installed
 
+![set_video command](https://github.com/Bennoo/GPTube/blob/main/blob/setvideo.png?raw=true)
 
 8. Ask the bot anything about the video
+
+![set_video command](https://github.com/Bennoo/GPTube/blob/main/blob/question.png?raw=true)
 
 ## 🤔 What is this?
 
