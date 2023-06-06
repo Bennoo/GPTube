@@ -25,10 +25,6 @@ def get_response_from_query(client:commands.Bot, query:str, k=4):
     human_template = "Answer the following question: {question}"
     human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
 
-    # Human question prompt
-    human_template = "Answer the following question: {question}"
-    human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
-
     chat_prompt = ChatPromptTemplate.from_messages(
         [system_message_prompt, human_message_prompt]
     )
