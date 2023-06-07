@@ -1,15 +1,16 @@
-import json
 from langchain.prompts.chat import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
+    PromptTemplate
 )
 from discord.ext import commands
-from langchain.chains import LLMChain
+from langchain.chains import LLMChain, ConversationalRetrievalChain
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.document_loaders import YoutubeLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
+from langchain.memory import ConversationBufferMemory
 
 def get_response_from_query(client:commands.Bot, query:str, k=4):
     """
@@ -33,6 +34,22 @@ def get_response_from_query(client:commands.Bot, query:str, k=4):
 
     response = chain.run(question=query, docs=docs_page_content, meta_info=client.video_meta)
     return response, docs
+
+def get_qa(client:commands.Bot):
+    qa = ConversationalRetrievalChain.from_llm(
+        llm=client.openaiChat,
+        chain_type="stuff",
+        retriever=client.video_db.as_retriever(),
+        verbose=True,
+        return_source_documents=True
+        )
+    client.chat_history = []
+    return qa
+
+def get_qa_from_query(client:commands.Bot, query):
+    answer = client.qa({"question": query, "chat_history": client.chat_history})
+    client.chat_history.append((query, answer['answer']))
+    return answer['answer']
 
 def set_video_as_vector(link:str, embeddings:OpenAIEmbeddings):
     loader = YoutubeLoader.from_youtube_url(link, add_video_info=True)
