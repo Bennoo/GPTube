@@ -53,7 +53,7 @@ def repeat_text(ack, say, command):
     db, meta_data = langchain_helper.set_video_as_vector(url, embeddings)
     app.document_db = db
     app.meta_data = meta_data
-    say(text="Video is set!")
+    say(text=f"Video is set! {url}")
 
 @app.action('clean_button')
 def on_clear(ack, say):
@@ -70,6 +70,13 @@ def on_clear(ack, say):
             }
         ],
         text=f"{clear_text}")
+
+@app.error
+def handle_errors(error, say):
+    if isinstance(error, BoltUnhandledRequestError):
+        return
+    else:
+        say(text='Something goes wrong in the slack app...')
 
 # Start your app
 if __name__ == "__main__":

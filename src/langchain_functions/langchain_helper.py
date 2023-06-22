@@ -5,14 +5,12 @@ from langchain.prompts.chat import (
 )
 from slack_bolt import App
 from discord.ext import commands
-from langchain.chains import LLMChain, ConversationalRetrievalChain
+from langchain.chains import LLMChain, ConversationalRetrievalChain, RetrievalQA
 from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.document_loaders import YoutubeLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
-
-from langchain_functions.custom_chain import custom_loading_qa_chain as custom_qa
 
 def get_response_from_query(client:commands.Bot, query:str, k=4):
     """
@@ -65,17 +63,14 @@ def set_video_as_vector(link:str, embeddings:OpenAIEmbeddings):
     return db, video_meta
 
 def get_response_qa_from_query_bolt(query:str, app:App, chain_type:str):
-    doc_chain = custom_qa.load_qa_with_sources_chain(app.openaiChat, chain_type=chain_type, verbose=True)
-    question_generator = LLMChain(llm=app.openaiQuestion, prompt=CONDENSE_QUESTION_PROMPT, verbose=True)
 
-    qa = ConversationalRetrievalChain(
-        retriever=app.document_db.as_retriever(search_kwargs={"k": 30}),
-        question_generator=question_generator,
-        combine_docs_chain = doc_chain,
-        max_tokens_limit=10000,
-        return_generated_question=True
+    qa = ConversationalRetrievalChain.from_llm(
+        app.openaiChat,
+        app.document_db.as_retriever(search_kwargs={"k": 3}),
+        condense_question_llm = app.openaiQuestion,
+        verbose=True
     )
 
     answer = qa({"question": query, "chat_history": app.chat_history})
     app.chat_history.append((query, answer['answer']))
-    return answer['answer'], answer['generated_question']
+    return answer['answer'], answer['question']
