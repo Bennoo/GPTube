@@ -9,15 +9,16 @@ from langchain_functions.custom_chain import waiting_time
 
 from langchain.embeddings.openai import OpenAIEmbeddings
 
-app = slack_helper.get_slack_bolt_app('gpt-3.5-turbo-16k', 'gpt-3.5-turbo', 0.1)
-embeddings = OpenAIEmbeddings()
+# app = slack_helper.get_slack_bolt_app('gpt-3.5-turbo-16k', 'gpt-3.5-turbo', 0.1)
+app = slack_helper.get_slack_bolt_app_azure('gpt35t', 'gpt35t', 0.1)
+embeddings = OpenAIEmbeddings(deployment="embed", chunk_size=1)
 
 @app.event('app_mention')
 def on_mention(body, say):
-    waiting_time_generator = waiting_time.get_waiting_time_generator()
+    waiting_time_generator = waiting_time.get_azureo_waiting_time_generator()
     # Check if a video is already set
     if app.document_db is None:
-        warning_text = waiting_time_generator.run('no video set, you should give me a valid youtube video link.')
+        warning_text = waiting_time_generator.run('no video set, you should give me a valid youtube video link by using the appropriate command.')
         slack_helper.say_standard_block_answer_message(say, answer=warning_text)
     else:
         waiting_text = waiting_time_generator.run('Give me some time, I am thinking and I check the video content')
@@ -49,7 +50,7 @@ def repeat_text(ack, say, command):
     # Acknowledge command request
     ack()
     url = command['text']
-    say(text="Watching the whole video...")
+    say(text="Watching the whole video... It takes a few minutes..")
     db, meta_data = langchain_helper.set_video_as_vector(url, embeddings)
     app.document_db = db
     app.meta_data = meta_data
