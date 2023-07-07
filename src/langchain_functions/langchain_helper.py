@@ -67,7 +67,7 @@ def set_video_as_vector(link:str, embeddings:OpenAIEmbeddings, chunk_size = 1000
 
 def get_response_qa_from_query_bolt(query:str, app:App, chain_type:str):
 
-    doc_chain = load_qa_chain(llm=app.openaiChat, chain_type=chain_type, verbose=True, prompt=custom_qa_prompts.CUSTOM_YT_PROMPT)
+    doc_chain = load_qa_chain(llm=app.openaiChat, chain_type=chain_type, verbose=False, prompt=custom_qa_prompts.CUSTOM_YT_PROMPT)
     question_generator = LLMChain(llm=app.openaiQuestion, prompt=CONDENSE_QUESTION_PROMPT, verbose=False)
 
     qa = ConversationalRetrievalChain(

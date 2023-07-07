@@ -16,40 +16,44 @@ embeddings = OpenAIEmbeddings()
 
 @app.message()
 def on_message(body, message, say):
+    waiting_time_generator = waiting_time.get_openai_waiting_time_generator()
     user = message['user']
     channel_id = message["channel"]
-    waiting_time_generator = waiting_time.get_openai_waiting_time_generator()
-    waiting_text = waiting_time_generator.run(
-        "Give me some time, I will check the video content"
-    )
-    response = say(
-        blocks=[
-            {"type": "section", "text": {"type": "mrkdwn", "text": f"<@{user}> _{waiting_text}_"}}
-        ],
-        text=f"{waiting_text}",
-        channel_id=channel_id
-    )
-    text_question = body["event"]["text"]
-    answer, generated_question = langchain_helper.get_response_qa_from_query_bolt(text_question, app, "stuff")
+    if app.document_db is None:
+        warning_text = waiting_time_generator.run('no video set, you should give me a valid youtube video link.')
+        slack_helper.say_standard_block_answer_message(say, answer=warning_text, channel_id=channel_id)
+    else:
+        waiting_text = waiting_time_generator.run(
+            "Give me some time, I will check the video content"
+        )
+        response = say(
+            blocks=[
+                {"type": "section", "text": {"type": "mrkdwn", "text": f"<@{user}> _{waiting_text}_"}}
+            ],
+            text=f"{waiting_text}",
+            channel_id=channel_id
+        )
+        text_question = body["event"]["text"]
+        answer, generated_question = langchain_helper.get_response_qa_from_query_bolt(text_question, app, "stuff")
 
-    text = generated_question
-    blocks = [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": f"_ <@{user}> asked for:_ *{generated_question}*",
-            },
-        }
-    ]
+        text = generated_question
+        blocks = [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"_ <@{user}> asked for:_ *{generated_question}*",
+                },
+            }
+        ]
 
-    app.client.chat_update(
-        channel=response["channel"], ts=response["ts"], text=text, blocks=blocks
-    )
+        app.client.chat_update(
+            channel=response["channel"], ts=response["ts"], text=text, blocks=blocks
+        )
 
-    slack_helper.say_standard_block_answer_message(
-        say, answer=answer, exchanges=len(app.chat_history), channel_id=channel_id
-    )
+        slack_helper.say_standard_block_answer_message(
+            say, answer=answer, exchanges=len(app.chat_history), channel_id=channel_id
+        )
 
 @app.command("/set_video")
 def repeat_text(ack, say, command):
@@ -66,7 +70,7 @@ def repeat_text(ack, say, command):
     app.meta_data = meta_data
     say(text=f"Video is set! {url}")
 
-@app.action('clean_button')
+@app.action('button-clear')
 def on_clear(ack, say):
     app.chat_history = []
     app.document_db = None
