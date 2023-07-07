@@ -11,7 +11,7 @@ def get_openai_waiting_time_generator():
     "
     prompt = PromptTemplate(input_variables=["sentence"], template=prompt_template)
     chatopenai = ChatOpenAI(
-                model_name="gpt-3.5-turbo", temperature=0.9)
+                model_name="gpt-3.5-turbo", temperature=1.7)
     llmchain_chat = LLMChain(llm=chatopenai, prompt=prompt)
     return llmchain_chat
 

@@ -10,13 +10,13 @@ QUESTION: {question}
 =========
 PARTS:
 =========
-{summaries}
+{context}
 META DATA:
 =========
-{metadata}
+{meta}
 =========
 FINAL ANSWER:"""
-CUSTOM_YT_PROMPT = PromptTemplate(template=custom_qa_template, input_variables=["summaries", "question", "metadata"])
+CUSTOM_YT_PROMPT = PromptTemplate(template=custom_qa_template, input_variables=["context", "question", "meta"])
 
 CUSTOM_YT_EXAMPLE_PROMPT = PromptTemplate(
     template="Content: {page_content}",

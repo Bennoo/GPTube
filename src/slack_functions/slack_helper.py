@@ -1,6 +1,7 @@
 import os
 from slack_bolt import App
 from langchain.chat_models import ChatOpenAI, AzureChatOpenAI
+import inflect
 
 def get_slack_bolt_app(openai_model_chat:str, openai_model_question:str, model_temp:float) -> App:
     app = App(token=os.environ.get("SLACK_BOT_TOKEN"), raise_error_for_unhandled_request=True)
@@ -32,21 +33,23 @@ def get_slack_bolt_app_azure(model_chat_id:str, model_question_id:str, model_tem
     app.chat_history = []
     return app
 
-def say_standard_block_answer_message(say, answer):
+def say_standard_block_answer_message(say, answer, exchanges=0, channel_id=None):
+    text_exchange = f'{exchanges} {inflect.engine().plural("exchange", exchanges)}'
     text = answer
     blocks = [
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": f"_{answer}_"}
+                "text": {"type": "mrkdwn", "text": f"{answer}"}
             },
             {
-			"type": "divider"
-            },
+			    "type": "divider",
+			    "block_id": "divider1"
+		    },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"_Clean Bot's memory_"
+                    "text": f"_You can clear what the bot reminds from the conversation ({text_exchange})_"
                 },
                 "accessory": {
                     "type": "button",
@@ -55,21 +58,8 @@ def say_standard_block_answer_message(say, answer):
                         "text": "Clear history"
                     },
                     "style": "danger",
-                    "action_id": "clean_button"
+                    "action_id": "button-clear"
                 }
             }
         ]
-    say(blocks=blocks, text=text)
-
-# def ack_and_clean_conv_history(ack, say, app, text_generator):
-#     app.chat_history = []
-#     waiting_text = text_generator.run('I forgot all you already said before')
-#     ack()
-#     say(
-#         blocks=[
-#             {
-#                 "type": "section",
-#                 "text": {"type": "mrkdwn", "text": f"_..{waiting_text}.._"}
-#             }
-#         ],
-#         text=f"{waiting_text}")
+    say(blocks=blocks, text=text, channel_id=channel_id)
