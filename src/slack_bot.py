@@ -60,6 +60,7 @@ def repeat_text(ack, say, command):
     # Acknowledge command request
     ack()
     url = command['text']
+    user = command['user_id']
     waiting_time_generator = waiting_time.get_openai_waiting_time_generator()
     waiting_text = waiting_time_generator.run(
         "Watching the whole video... It takes a moment.."
@@ -68,7 +69,7 @@ def repeat_text(ack, say, command):
     db, meta_data = langchain_helper.set_video_as_vector(url, embeddings)
     app.document_db = db
     app.meta_data = meta_data
-    say(text=f"Video is set! {url}")
+    say(text=f"Video is set by <@{user}>! {url}")
 
 @app.action('button-clear')
 def on_clear(ack, say):
