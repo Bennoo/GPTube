@@ -55,7 +55,7 @@ def on_message(body, message, say):
             say, answer=answer, exchanges=len(app.chat_history), channel_id=channel_id
         )
 
-@app.command("/set_video")
+@app.command("/vid")
 def repeat_text(ack, say, command):
     # Acknowledge command request
     ack()
