@@ -9,14 +9,14 @@ from langchain_functions.custom_chain import waiting_time
 
 from langchain.embeddings.openai import OpenAIEmbeddings
 
-app = slack_helper.get_slack_bolt_app('gpt-4', 'gpt-3.5-turbo', 1)
+app = slack_helper.get_slack_bolt_app_azure('gpt4-32k', 'gpt35t', 0.6)
 # app = slack_helper.get_slack_bolt_app_azure('gpt35t', 'gpt35t', 0.1)
-# embeddings = OpenAIEmbeddings(deployment="embed", chunk_size=1)
-embeddings = OpenAIEmbeddings()
+embeddings = OpenAIEmbeddings(deployment="embedding", chunk_size=16)
+# embeddings = OpenAIEmbeddings()
 
 @app.message()
 def on_message(body, message, say):
-    waiting_time_generator = waiting_time.get_openai_waiting_time_generator()
+    waiting_time_generator = waiting_time.get_azureo_waiting_time_generator()
     user = message['user']
     channel_id = message["channel"]
     if app.document_db is None:
@@ -61,7 +61,7 @@ def repeat_text(ack, say, command):
     ack()
     url = command['text']
     user = command['user_id']
-    waiting_time_generator = waiting_time.get_openai_waiting_time_generator()
+    waiting_time_generator = waiting_time.get_azureo_waiting_time_generator()
     waiting_text = waiting_time_generator.run(
         "Watching the whole video... It takes a moment.."
     )
