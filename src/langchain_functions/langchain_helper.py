@@ -54,11 +54,11 @@ def get_qa_from_query(client:commands.Bot, query):
     client.chat_history.append((query, answer['answer']))
     return answer['answer']
 
-def set_video_as_vector(link:str, embeddings:OpenAIEmbeddings, chunk_size = 1000):
+def set_video_as_vector(link:str, embeddings:OpenAIEmbeddings, chunk_size = 3000): #TODO change size
     loader = YoutubeLoader.from_youtube_url(link, language=["en", "fr"], translation="en", add_video_info=True)
     transcript = loader.load()
     video_meta = loader._get_video_info()
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=200)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=500) #TODO change size
     docs = text_splitter.split_documents(transcript)
 
     db = FAISS.from_documents(docs, embeddings)
@@ -67,17 +67,18 @@ def set_video_as_vector(link:str, embeddings:OpenAIEmbeddings, chunk_size = 1000
 
 def get_response_qa_from_query_bolt(query:str, app:App, chain_type:str):
 
-    doc_chain = load_qa_chain(llm=app.openaiChat, chain_type=chain_type, verbose=False, prompt=custom_qa_prompts.CUSTOM_YT_PROMPT)
-    question_generator = LLMChain(llm=app.openaiQuestion, prompt=CONDENSE_QUESTION_PROMPT, verbose=False)
+    doc_chain = load_qa_chain(llm=app.openaiChat, chain_type=chain_type, verbose=True, prompt=custom_qa_prompts.CUSTOM_YT_PROMPT)
+    question_generator = LLMChain(llm=app.openaiQuestion, prompt=CONDENSE_QUESTION_PROMPT, verbose=True)
 
     qa = ConversationalRetrievalChain(
-        retriever=app.document_db.as_retriever(search_kwargs={"k": 10}),
+        retriever=app.document_db.as_retriever(search_kwargs={"k": 15}),
         question_generator=question_generator,
         combine_docs_chain = doc_chain,
-        max_tokens_limit=6000,
+        max_tokens_limit=30000,
         return_generated_question=True
     )
 
     answer = qa({"question": query, "chat_history": app.chat_history, "meta": app.meta_data})
     app.chat_history.append((query, answer['answer']))
     return answer['answer'], answer['generated_question']
+
