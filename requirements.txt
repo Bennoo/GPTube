@@ -1,0 +1,11 @@
+discord.py
+faiss-cpu
+langchain
+openai
+pandas
+pydantic
+pytube
+youtube-transcript-api
+slack-bolt
+tiktoken
+inflect

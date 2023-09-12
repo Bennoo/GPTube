@@ -27,7 +27,7 @@ async def on_message(message):
     if client.user.mentioned_in(message):
         async with message.channel.typing():
             try:
-                response, _ = langchain_helper.get_response_from_query(client, message.content, 4)
+                response = langchain_helper.get_qa_from_query(client, message.content)
                 await message.channel.send(response)
             except Exception as e:
                 print(f"An exception occurred: {str(e)}")
@@ -41,6 +41,7 @@ async def set_video(ctx, link):
             db, video_meta = langchain_helper.set_video_as_vector(link, embeddings)
             client.video_db = db
             client.video_meta = video_meta
+            client.qa = langchain_helper.get_qa(client)
             await ctx.channel.send('I checked the video!')
         except Exception as e:
             print(f"An exception occurred: {str(e)}")
